@@ -39,13 +39,17 @@ const express = require('express');
 const { createClient } = require('@supabase/supabase-js');
 
 const app = express();
-const port = 3000; 
+const port = 3000;
 
 app.use(express.json());
 
 const supabaseUrl = 'https://znsythilpyogxqfatkls.supabase.co';
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inpuc3l0aGlscHlvZ3hxZmF0a2xzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzAxNjg2NzMsImV4cCI6MjA0NTc0NDY3M30.POIx1jJpUmZc4EM_2Q5AxCfa8uFbNwYGC6Gs_7YYySc';
 const supabase = createClient(supabaseUrl, supabaseKey);
+
+app.get('/', (req, res) => {
+    res.send('Welcome to the authentication server. Use /register to sign up and /login to log in.');
+});
 
 app.post('/register', async (req, res) => {
     const { email, password } = req.body;
