@@ -72,34 +72,69 @@ app.listen(port, () => {
 
 
 
-const express = require('express')
-const axios = require('axios')
-const path = require('path')
-const app = express()
-const port = 3000
+const express = require('express');
+const axios = require('axios');
+const app = express();
+const port = 3000;
 
-
+// Home route
 app.get('/', (req, res) => {
-    res.send(`test`);
+    res.send(`
+        <h1>Heads or Tails</h1>
+        <p1>Enter the number of trivia questions you'd like to answer.<br></p1>
+
+        <form action="/questions" method="GET">
+            <label for="numQuestions">How Many:</label>
+            <input type="number" id="numQuestions" name="numQuestions" min="1" max="50" required>
+            <button type="submit">Get Questions</button>
+        </form>
+    `);
 });
 
-
-app.get('/:numQuestions', async (req, res) => {
-    const numQuestions = req.params.numQuestions;
+// Questions route
+app.get('/questions', async (req, res) => {
+    const numQuestions = req.query.numQuestions;
     const response = await axios.get(`https://opentdb.com/api.php?amount=${numQuestions}&type=boolean`);
     const questions = response.data.results;
 
-        const questionsHtml = questions.map(q => `<li>${q.question}</li>`).join('');
-        res.send(`
-            <h1>True/False Trivia Questions</h1>
-            <ul>
-                ${questionsHtml}
-            </ul>`);
-   
-    });
+    const questionsHtml = questions.map((q, index) => `
+        <li>
+            ${q.question}<br>
+            <form action="/answer" method="POST">
+                <input type="hidden" name="question" value="${q.question}">
+                <input type="hidden" name="correct_answer" value="${q.correct_answer}">
+                <button name="answer" value="True">True</button>
+                <button name="answer" value="False">False</button>
+            </form>
+        </li>
+    `).join('');
 
+    res.send(`
+        <h1>True/False Trivia Questions</h1>
+        <ul>
+            ${questionsHtml}
+        </ul>
+    `);
+});
 
+app.use(express.urlencoded({ extended: true }));
+
+app.post('/answer', (req, res) => {
+    const userAnswer = req.body.answer;
+    const correctAnswer = req.body.correct_answer;
+    let result;
+    if (userAnswer == correctAnswer) {
+        result = 'Correct'
+    } else {result = 'Incorrect'}
+    
+    res.send(`
+        <h1>Your Answer</h1>
+        <p>${result}</p>
+        <a href="/questions">Try again</a>
+    `);
+});
+
+// Start the server
 app.listen(port, () => {
     console.log(`Server is running on port ${port}`);
 });
-
