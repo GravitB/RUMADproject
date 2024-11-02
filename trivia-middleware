@@ -4,6 +4,8 @@ const path = require('path');
 const port = 3000 
 const axios = require('axios')
 
+app.use(express.json());
+
 const getTrivia = async () => {
     const res = await axios.get(`https://opentdb.com/api.php?amount=${num}`)
     if(res.ok){
@@ -20,5 +22,10 @@ app.get('/', (req,res) => {
 
 app.post('/trivia', async (req, res) => {
     const {amount} = req.body;
-    
+
+    const triviaQuestions = await getTrivia(amount);
+})
+
+app.listen(port, ()=> {
+    console.log("Running on port ${port})")
 })
