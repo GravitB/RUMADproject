@@ -48,13 +48,7 @@ const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 app.get('/', (req, res) => {
-    res.send('Welcome to the authentication server. Use /register to sign up and /login to log in.');
-});
-
-app.post('/register', async (req, res) => {
-    const { email, password } = req.body;
-    const { user } = await supabase.auth.signUp({ email, password });
-    res.json({ user });
+    res.send('Welcome to the authentication server. Use /login to log in.');
 });
 
 app.post('/login', async (req, res) => {
