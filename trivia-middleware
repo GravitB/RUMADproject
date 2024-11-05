@@ -133,3 +133,101 @@ app.post('/answer', (req, res) => {
 app.listen(port, () => {
     console.log(`Server is running on port ${port}`);
 });
+
+
+
+
+
+
+
+
+
+const express = require('express');
+const axios = require('axios');
+const app = express();
+const port = 3000;
+const path = require('path');
+
+app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.urlencoded({ extended: true }));
+
+app.get('/', (req, res) => {
+    res.send(`
+        <head>
+            <link rel="stylesheet" href="/styles.css">
+        </head>
+        <body>
+            <div class="container">
+                <h1>Fact Frenzy</h1>
+                <p class="ready-text">Are you ready?<br></p>
+                <form action="/questions" method="GET">
+                    <button class="yes" type="submit">Yes</button>
+                </form>
+            </div>
+        </body>
+    `);
+});
+
+app.get('/questions', async (req, res) => {
+    try {
+        const response = await axios.get(`https://opentdb.com/api.php?amount=1&type=boolean`);
+        const questions = response.data.results;
+        const question = questions[0];
+
+        res.send(`
+            <head>
+                <link rel="stylesheet" href="/styles.css">
+            </head>
+            <body>
+                <div class="container">
+                    <h1>True or False?</h1>
+                    <p class="question-text">${question.question}</p>
+                    <div class="button-container">
+                        <form action="/answer" method="POST">
+                            <input type="hidden" name="question" value="${question.question}">
+                            <input type="hidden" name="correct_answer" value="${question.correct_answer}">
+                            <button class="true" name="answer" value="True">True</button>
+                            <button class="false" name="answer" value="False">False</button>
+                        </form>
+                    </div>
+                </div>
+            </body>
+        `);
+    } catch (error) {
+        console.error('Error fetching question:', error);
+        res.send('<p>There was an error retrieving the question.</p>');
+    }
+});
+
+app.use(express.urlencoded({ extended: true }));
+
+app.post('/answer', (req, res) => {
+    const userAnswer = req.body.answer;
+    const correctAnswer = req.body.correct_answer;
+    let result;
+    if (userAnswer === correctAnswer) {
+        result = 'CORRECT!';
+    } else {
+        result = 'Incorrect...';
+    }
+    
+    res.send(`
+        <head>
+            <link rel="stylesheet" href="/styles.css">
+        </head>
+        <body>
+            <div class="container">
+                <h1>Your Answer</h1>
+                <p class="result">${result}</p>
+                <form action="/questions" method="GET">
+                    <button class="next" type="submit">Next Question</button>
+                </form>
+            </div>
+        </body>
+    `);
+});
+
+app.listen(port, () => {
+    console.log(`Server is running on port ${port}`);
+});
+
